@@ -150,7 +150,7 @@
     .hidden { display: none !important; }
 
     /* 表單樣式 */
-    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; position: relative; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-main); }
     .form-control {
       width: 100%; padding: 8px 12px; border-radius: 8px;
@@ -158,6 +158,19 @@
       background: #FFFFFF; color: var(--text-main);
     }
     .form-control:focus { border-color: var(--wood); }
+
+    /* 地址自動建議下拉選單 */
+    .address-suggestions {
+      position: absolute; top: calc(100% + 2px); left: 0; right: 0;
+      background: #FFFFFF; border: 1px solid var(--border-color);
+      border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      max-height: 180px; overflow-y: auto; z-index: 10005;
+    }
+    .suggestion-item {
+      padding: 8px 12px; font-size: 11px; border-bottom: 1px solid #F5F3EF;
+      cursor: pointer; color: var(--text-main);
+    }
+    .suggestion-item:hover { background: var(--bg-main); color: var(--wood-hover); }
 
     .photos-list {
       display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;
@@ -188,6 +201,15 @@
       transform: rotate(-45deg) scale(1.08);
     }
     .custom-pin span { transform: rotate(45deg); font-size: 12px; font-weight: 700; }
+
+    /* Lightbox 導航按鈕樣式 */
+    .lightbox-nav-btn {
+      background: rgba(255,255,255,0.18); border: none; color: #FFF;
+      width: 38px; height: 38px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; cursor: pointer;
+      backdrop-filter: blur(4px); transition: background 0.2s;
+    }
+    .lightbox-nav-btn:hover { background: rgba(255,255,255,0.35); }
   </style>
 </head>
 <body>
@@ -291,19 +313,22 @@
         </select>
       </div>
 
+      <!-- 地址輸入與即時建議下拉 -->
       <div class="form-group">
-        <label>地址或地標名稱（供 Google 導航使用）</label>
-        <input type="text" id="editAddress" placeholder="例如：山梨県富士吉田市下吉田３丁目５−１６" class="form-control">
+        <label>地址或地標名稱（輸入後自動建議並換算經緯度）*</label>
+        <input type="text" id="editAddress" placeholder="例如：山梨県富士吉田市下吉田３丁目５−１６ 或 日川時計店" class="form-control" oninput="handleAddressInput(event)" autocomplete="off">
+        <div id="addressSuggestions" class="address-suggestions hidden"></div>
+        <span id="geoStatusText" style="font-size:11px;color:var(--wood);margin-top:2px;"></span>
       </div>
 
       <div style="display:flex;gap:8px;">
         <div class="form-group" style="flex:1;">
-          <label>緯度 (Lat, 選填)</label>
-          <input type="number" step="any" id="editLat" placeholder="例: 35.492" class="form-control">
+          <label>緯度 (Lat)</label>
+          <input type="number" step="any" id="editLat" placeholder="自動換算" class="form-control">
         </div>
         <div class="form-group" style="flex:1;">
-          <label>經度 (Lng, 選填)</label>
-          <input type="number" step="any" id="editLng" placeholder="例: 138.804" class="form-control">
+          <label>經度 (Lng)</label>
+          <input type="number" step="any" id="editLng" placeholder="自動換算" class="form-control">
         </div>
       </div>
 
@@ -373,19 +398,32 @@
     </div>
   </div>
 
-  <!-- Lightbox 大圖檢視 -->
-  <div id="lightboxModal" class="modal-backdrop hidden" style="background:rgba(44, 44, 44, 0.94);flex-direction:column;justify-content:space-between;color:#FFF;">
-    <div style="width:100%;max-width:800px;display:flex;justify-content:space-between;align-items:center;">
+  <!-- Lightbox 大圖檢視（支援左滑/右滑切換、箭頭按鈕） -->
+  <div id="lightboxModal" class="modal-backdrop hidden" style="background:rgba(44, 44, 44, 0.94);flex-direction:column;justify-content:space-between;color:#FFF;padding:12px 16px;">
+    <div style="width:100%;max-width:850px;display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h4 id="lightboxTitle" style="font-size:14px;font-weight:700;"></h4>
         <span id="lightboxIndex" style="font-size:12px;color:#AAA;"></span>
       </div>
       <button onclick="closeLightbox()" style="background:none;border:none;color:#FFF;cursor:pointer;"><i data-lucide="x"></i></button>
     </div>
-    <div style="max-height:75vh;max-width:100%;display:flex;align-items:center;justify-content:center;">
-      <img id="lightboxImg" src="" style="max-height:75vh;max-width:100%;object-fit:contain;border-radius:8px;">
+
+    <!-- 圖片主體與左右切換導航按鈕 -->
+    <div id="lightboxSwipeArea" style="width:100%;max-width:850px;position:relative;display:flex;align-items:center;justify-content:center;flex:1;touch-action:pan-y;">
+      <button onclick="prevLightboxImage(event)" class="lightbox-nav-btn" style="position:absolute;left:8px;z-index:2;" title="上一張">
+        <i data-lucide="chevron-left" style="width:22px;height:22px;"></i>
+      </button>
+
+      <div style="max-height:75vh;max-width:100%;display:flex;align-items:center;justify-content:center;">
+        <img id="lightboxImg" src="" style="max-height:75vh;max-width:100%;object-fit:contain;border-radius:8px;user-select:none;pointer-events:none;">
+      </div>
+
+      <button onclick="nextLightboxImage(event)" class="lightbox-nav-btn" style="position:absolute;right:8px;z-index:2;" title="下一張">
+        <i data-lucide="chevron-right" style="width:22px;height:22px;"></i>
+      </button>
     </div>
-    <p id="lightboxCaption" style="font-size:12px;color:#DDD;text-align:center;"></p>
+
+    <p id="lightboxCaption" style="font-size:12px;color:#DDD;text-align:center;padding:4px 0;"></p>
   </div>
 
   <script>
@@ -521,11 +559,13 @@
     let currentModalPhotos = [];
     let currentSpotIndex = 0;
     let currentSpot = null;
+    let geoTimeout = null;
 
     window.addEventListener('DOMContentLoaded', () => {
       loadSpots();
       initMap();
       renderSpots();
+      initLightboxSwipe();
       lucide.createIcons();
     });
 
@@ -657,8 +697,8 @@
 
     function focusSpot(id) {
       const s = spots.find(x => x.id === id);
-      if (s && map) {
-        map.setView([s.lat, s.lng], 14);
+      if (s && map && s.lat && s.lng) {
+        map.setView([s.lat, s.lng], 15);
         document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
@@ -670,7 +710,8 @@
 
     function focusAllSpots() {
       if (!map || spots.length === 0) return;
-      map.fitBounds(L.latLngBounds(spots.map(s => [s.lat, s.lng])), { padding: [30, 30] });
+      const valid = spots.filter(s => s.lat && s.lng).map(s => [s.lat, s.lng]);
+      if (valid.length > 0) map.fitBounds(L.latLngBounds(valid), { padding: [30, 30] });
     }
 
     function focusRegion(r) {
@@ -744,11 +785,69 @@
       lucide.createIcons();
     }
 
+    /* 需求 1：地址即時建議搜尋與換算經緯度 */
+    function handleAddressInput(e) {
+      const q = e.target.value.trim();
+      const list = document.getElementById('addressSuggestions');
+      const status = document.getElementById('geoStatusText');
+      if (geoTimeout) clearTimeout(geoTimeout);
+
+      if (q.length < 2) {
+        list.innerHTML = '';
+        list.classList.add('hidden');
+        status.textContent = '';
+        return;
+      }
+
+      status.textContent = '🔍 正在搜尋推薦地點與座標...';
+
+      geoTimeout = setTimeout(async () => {
+        try {
+          // 呼叫 Nominatim 地理編碼 API (針對日本地點)
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=5&addressdetails=1`);
+          const data = await res.json();
+          list.innerHTML = '';
+
+          if (data && data.length > 0) {
+            status.textContent = '✓ 已找到地點建議，請點選：';
+            data.forEach(item => {
+              const div = document.createElement('div');
+              div.className = 'suggestion-item';
+              div.textContent = item.display_name;
+              div.onclick = () => selectSuggestedAddress(item);
+              list.appendChild(div);
+            });
+            list.classList.remove('hidden');
+          } else {
+            status.textContent = '未找到建議，可手動保留地址或填寫經緯度。';
+            list.classList.add('hidden');
+          }
+        } catch (err) {
+          status.textContent = '';
+          list.classList.add('hidden');
+        }
+      }, 400);
+    }
+
+    function selectSuggestedAddress(item) {
+      document.getElementById('editAddress').value = item.display_name;
+      document.getElementById('editLat').value = parseFloat(item.lat).toFixed(6);
+      document.getElementById('editLng').value = parseFloat(item.lon).toFixed(6);
+      
+      const list = document.getElementById('addressSuggestions');
+      list.innerHTML = '';
+      list.classList.add('hidden');
+      document.getElementById('geoStatusText').textContent = `✓ 座標已自動換算：${parseFloat(item.lat).toFixed(4)}, ${parseFloat(item.lon).toFixed(4)}`;
+    }
+
     function openEditModal(spotId) {
       if (!isAdmin) return alert('需要管理員權限');
       document.getElementById('editModal').classList.remove('hidden');
       const deleteBtn = document.getElementById('deleteSpotBtn');
       document.getElementById('uploadLabelText').textContent = '選擇手機/電腦相片';
+      document.getElementById('geoStatusText').textContent = '';
+      const list = document.getElementById('addressSuggestions');
+      if (list) { list.innerHTML = ''; list.classList.add('hidden'); }
 
       if (spotId) {
         const spot = spots.find(s => s.id === spotId);
@@ -798,7 +897,7 @@
       }
     }
 
-    /* 修正：儲存成功明確跳出確認提示 */
+    /* 需求 1：儲存新機位時，將其立即標記在地圖上並自動平移聚焦 */
     function saveSpotData() {
       const id = document.getElementById('editSpotId').value;
       const name = document.getElementById('editName').value.trim();
@@ -834,7 +933,13 @@
       renderMarkers();
       renderSpots();
       closeEditModal();
-      alert(`機位「${name}」已成功儲存！`);
+
+      // 地圖視野立即平移聚焦至新機位圖釘
+      if (map && lat && lng) {
+        map.setView([lat, lng], 15);
+      }
+
+      alert(`機位「${name}」已成功儲存並標示於地圖！`);
     }
 
     function renderModalPhotos() {
@@ -860,7 +965,6 @@
       renderModalPhotos();
     }
 
-    /* 修正：優化圖片壓縮流程，防止卡在「壓縮中」，並給予成功狀態提示 */
     function handleImageUpload(e) {
       const files = e.target.files;
       const label = document.getElementById('uploadLabelText');
@@ -939,20 +1043,42 @@
     }
 
     function pasteBackupFromText() {
-      const t = prompt('請貼上備份文字：');
-      if (t) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.style.zIndex = '10002';
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width:400px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:10px;">貼上備份代碼</h3>
+          <textarea id="pasteArea" rows="6" placeholder="請在此長按並貼上整段代碼..." class="form-control" style="font-size:11px;word-break:break-all;"></textarea>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button id="cancelPaste" class="btn" style="flex:1;justify-content:center;">取消</button>
+            <button id="confirmPaste" class="btn btn-wood" style="flex:1;justify-content:center;">確認同步</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#cancelPaste').onclick = () => modal.remove();
+      modal.querySelector('#confirmPaste').onclick = () => {
+        const text = modal.querySelector('#pasteArea').value.trim();
+        if (!text) return alert('內容不能為空');
         try {
-          const d = JSON.parse(t);
-          if (Array.isArray(d)) {
-            spots = d;
+          const data = JSON.parse(text);
+          if (Array.isArray(data)) {
+            spots = data;
             saveSpots();
             renderMarkers();
             renderSpots();
+            modal.remove();
             closeSyncModal();
-            alert('同步成功！');
+            alert('同步成功！照片與機位已更新。');
+          } else {
+            alert('代碼格式不符');
           }
-        } catch(e) { alert('代碼格式錯誤'); }
-      }
+        } catch (e) {
+          alert('解析失敗：代碼不完整或被截斷，請嘗試改用「JSON 檔案匯入」。');
+        }
+      };
     }
 
     function exportBackupData() {
@@ -983,21 +1109,78 @@
       r.readAsText(f);
     }
 
+    /* 需求 2：Lightbox 大圖預覽、左滑下一張、右滑上一張與按鈕控制 */
     function openLightbox(id, idx) {
       const s = spots.find(x => x.id === id);
       if (!s || !s.images || s.images.length === 0) return;
       currentSpot = s;
       currentSpotIndex = idx;
-      document.getElementById('lightboxTitle').textContent = s.name;
-      document.getElementById('lightboxIndex').textContent = `${idx + 1} / ${s.images.length}`;
-      document.getElementById('lightboxImg').src = s.images[idx];
-      document.getElementById('lightboxCaption').textContent = s.notes || '';
+      updateLightboxDisplay();
       document.getElementById('lightboxModal').classList.remove('hidden');
       lucide.createIcons();
     }
 
+    function updateLightboxDisplay() {
+      if (!currentSpot || !currentSpot.images) return;
+      document.getElementById('lightboxTitle').textContent = currentSpot.name;
+      document.getElementById('lightboxIndex').textContent = `${currentSpotIndex + 1} / ${currentSpot.images.length}`;
+      document.getElementById('lightboxImg').src = currentSpot.images[currentSpotIndex];
+      document.getElementById('lightboxCaption').textContent = currentSpot.notes || '';
+    }
+
+    function nextLightboxImage(e) {
+      if (e) e.stopPropagation();
+      if (!currentSpot || !currentSpot.images) return;
+      currentSpotIndex = (currentSpotIndex + 1) % currentSpot.images.length;
+      updateLightboxDisplay();
+    }
+
+    function prevLightboxImage(e) {
+      if (e) e.stopPropagation();
+      if (!currentSpot || !currentSpot.images) return;
+      currentSpotIndex = (currentSpotIndex - 1 + currentSpot.images.length) % currentSpot.images.length;
+      updateLightboxDisplay();
+    }
+
     function closeLightbox() {
       document.getElementById('lightboxModal').classList.add('hidden');
+    }
+
+    // 觸控手勢監聽：左滑下一張、右滑上一張
+    function initLightboxSwipe() {
+      const area = document.getElementById('lightboxSwipeArea');
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      area.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      area.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+      }, { passive: true });
+
+      function handleSwipeGesture() {
+        const threshold = 45; // 滑動距離門檻
+        if (touchEndX < touchStartX - threshold) {
+          // 向左滑動 -> 下一張
+          nextLightboxImage();
+        } else if (touchEndX > touchStartX + threshold) {
+          // 向右滑動 -> 上一張
+          prevLightboxImage();
+        }
+      }
+
+      // 支援鍵盤左右箭頭切換
+      window.addEventListener('keydown', e => {
+        const modal = document.getElementById('lightboxModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          if (e.key === 'ArrowRight') nextLightboxImage();
+          else if (e.key === 'ArrowLeft') prevLightboxImage();
+          else if (e.key === 'Escape') closeLightbox();
+        }
+      });
     }
   </script>
 </body>
