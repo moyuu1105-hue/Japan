@@ -12,33 +12,19 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    :root {<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>日本攝影機位指南 · Japan Lens Guide</title>
-  
-  <!-- Leaflet Map CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
     :root {
-      --bg-warm: #FAF9F6;
+      /* 使用者指定調色盤 */
+      --bg-main: #F5EBE0;        /* 柔和燕麥色 */
+      --bg-sub: #D6CCC2;         /* 灰藕色／淺奶茶 */
+      --text-main: #3D3A37;      /* 深灰棕 */
+      --accent: #8D99AE;         /* 低飽和霧藍灰 */
+      --accent-hover: #7A869B;   /* 霧藍灰加深 */
       --card-bg: #FFFFFF;
-      --border: #E8E5DF;
-      --text-main: #2C2B29;
-      --text-muted: #7A7670;
-      --wood: #9E8265;
-      --wood-hover: #876D53;
-      --wood-light: #F4EFEB;
+      --border-color: #E3D9CE;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
-      background-color: var(--bg-warm); 
+      background-color: var(--bg-main); 
       color: var(--text-main); 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans TC", sans-serif;
       padding-bottom: 60px;
@@ -46,47 +32,48 @@
     }
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(250, 249, 246, 0.95);
+      background: rgba(245, 235, 224, 0.95);
       backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--bg-sub);
       height: 64px; display: flex; align-items: center; justify-content: space-between;
       padding: 0 16px; max-width: 1100px; margin: 0 auto;
     }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .icon-box {
       width: 36px; height: 36px; border-radius: 50%;
-      background: var(--wood-light); color: var(--wood);
+      background: #EAE0D5; color: var(--accent);
       display: flex; align-items: center; justify-content: center;
     }
     .title-area h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.6px; color: var(--text-main); }
-    .title-area p { font-size: 11px; color: var(--text-muted); }
+    .title-area p { font-size: 11px; color: #78736E; }
     .header-btns { display: flex; gap: 8px; }
     .btn {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 6px 12px; font-size: 12px; border-radius: 8px;
-      border: 1px solid var(--border); background: #FFF;
-      color: var(--text-muted); cursor: pointer; text-decoration: none;
+      border: 1px solid var(--border-color); background: #FFF;
+      color: var(--text-main); cursor: pointer; text-decoration: none;
       transition: all 0.2s ease;
     }
-    .btn:hover { background: #F8F7F4; border-color: #DCD8D0; }
-    .btn-wood { background: var(--wood); color: #FFF; border: none; font-weight: 600; }
-    .btn-wood:hover { background: var(--wood-hover); }
-    .btn-edit { background: #F4EFEB; color: var(--wood); border: 1px solid #E4DDD3; font-weight: 600; }
-    .btn-edit:hover { background: #EAE3DB; }
+    .btn:hover { background: #EFE6DC; border-color: var(--bg-sub); }
+    .btn-accent { background: var(--accent); color: #FFF; border: none; font-weight: 600; }
+    .btn-accent:hover { background: var(--accent-hover); }
+    .btn-edit { background: #EAE0D5; color: var(--text-main); border: 1px solid var(--bg-sub); font-weight: 600; }
+    .btn-edit:hover { background: #DECFC0; }
 
     main { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
     .section-card {
       background: var(--card-bg); border-radius: 16px;
-      border: 1px solid var(--border); padding: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      border: 1px solid var(--border-color); padding: 16px;
+      box-shadow: 0 2px 10px rgba(61, 58, 55, 0.04);
     }
     .map-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
     
     #map { 
       width: 100%; height: 360px; border-radius: 12px; 
-      border: 1px solid var(--border); z-index: 10; position: relative; 
-      background: #F4F4F2;
+      border: 1px solid var(--border-color); z-index: 10; position: relative; 
+      background: #EAE5DE;
     }
+    /* 日系極簡無印高冷白底地圖濾鏡 */
     .leaflet-japanese-clean {
       filter: grayscale(88%) contrast(92%) brightness(104%);
     }
@@ -95,56 +82,56 @@
     .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
     .filter-btn {
       padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
-      border: 1px solid var(--border); background: #FFF; color: var(--text-muted); cursor: pointer;
+      border: 1px solid var(--border-color); background: #FFF; color: #78736E; cursor: pointer;
       transition: all 0.2s;
     }
     .filter-btn.active { background: var(--text-main); color: #FFF; border-color: var(--text-main); }
     .search-input {
       padding: 7px 16px; border-radius: 20px; font-size: 12px;
-      border: 1px solid var(--border); width: 100%; max-width: 240px; outline: none;
-      background: #FFF;
+      border: 1px solid var(--border-color); width: 100%; max-width: 240px; outline: none;
+      background: #FFF; color: var(--text-main);
     }
-    .search-input:focus { border-color: var(--wood); }
+    .search-input:focus { border-color: var(--accent); }
 
     .grid-cards {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 16px;
     }
     .card {
-      background: #FFF; border-radius: 16px; border: 1px solid var(--border);
+      background: #FFF; border-radius: 16px; border: 1px solid var(--border-color);
       overflow: hidden; display: flex; flex-direction: column;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(61, 58, 55, 0.04); transition: transform 0.2s, box-shadow 0.2s;
     }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(61, 58, 55, 0.08); }
     .card-img-wrap {
-      position: relative; height: 190px; background: #ECEAE4; cursor: pointer; overflow: hidden;
+      position: relative; height: 190px; background: #E8DFD5; cursor: pointer; overflow: hidden;
     }
     .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
     .card:hover .card-img-wrap img { transform: scale(1.03); }
     .badge-index {
       position: absolute; top: 10px; left: 10px; width: 28px; height: 28px;
-      border-radius: 50%; background: rgba(44, 43, 41, 0.92); color: #FFF;
+      border-radius: 50%; background: var(--accent); color: #FFF;
       font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;
-      border: 1.5px solid #FFF;
+      border: 1.5px solid #FFF; box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
     .badge-photos {
       position: absolute; bottom: 8px; right: 10px; padding: 2px 8px;
-      border-radius: 12px; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+      border-radius: 12px; background: rgba(61, 58, 55, 0.65); backdrop-filter: blur(4px);
       color: #FFF; font-size: 11px;
     }
     .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
-    .card-title { font-size: 14px; font-weight: 700; margin-top: 2px; letter-spacing: 0.3px; }
-    .card-address { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-title { font-size: 14px; font-weight: 700; margin-top: 2px; letter-spacing: 0.3px; color: var(--text-main); }
+    .card-address { font-size: 11px; color: #78736E; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .info-box {
-      background: var(--bg-warm); border-radius: 10px; padding: 8px 10px;
-      font-size: 11px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border);
+      background: var(--bg-main); border-radius: 10px; padding: 8px 10px;
+      font-size: 11px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border-color);
     }
     .card-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 
-    /* Modal 彈窗層級強制置頂 9999 */
+    /* Modal 彈窗層級強化至 9999 */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(44, 43, 41, 0.6);
+      background: rgba(61, 58, 55, 0.6);
       backdrop-filter: blur(5px);
       z-index: 9999;
       display: flex; align-items: center; justify-content: center;
@@ -153,12 +140,12 @@
     .modal-box {
       background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 500px;
       max-height: 90vh; overflow-y: auto; padding: 22px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      box-shadow: 0 20px 40px rgba(61, 58, 55, 0.25);
       position: relative; z-index: 10000;
     }
     .modal-head { 
       display: flex; justify-content: space-between; align-items: center; 
-      margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; 
+      margin-bottom: 14px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; 
     }
     .hidden { display: none !important; }
 
@@ -167,18 +154,18 @@
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-main); }
     .form-control {
       width: 100%; padding: 8px 12px; border-radius: 8px;
-      border: 1px solid var(--border); font-size: 12px; outline: none;
+      border: 1px solid var(--border-color); font-size: 12px; outline: none;
     }
-    .form-control:focus { border-color: var(--wood); }
+    .form-control:focus { border-color: var(--accent); }
 
     .photos-list {
       display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;
-      background: var(--bg-warm); padding: 8px; border-radius: 10px;
-      border: 1px solid var(--border); margin-bottom: 8px;
+      background: var(--bg-main); padding: 8px; border-radius: 10px;
+      border: 1px solid var(--border-color); margin-bottom: 8px;
     }
     .photo-item {
       position: relative; width: 64px; height: 64px; border-radius: 8px;
-      overflow: hidden; border: 1px solid var(--border);
+      overflow: hidden; border: 1px solid var(--border-color);
     }
     .photo-item img { width: 100%; height: 100%; object-fit: cover; }
     .photo-del {
@@ -187,11 +174,17 @@
       border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px;
     }
 
+    /* 全新升級：低飽和霧藍灰水滴型地圖圖標 */
     .custom-pin {
-      width: 32px; height: 32px; background: var(--wood); color: #FFF;
+      width: 32px; height: 32px; background: var(--accent); color: #FFF;
       border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.22); border: 2px solid #FFF;
+      box-shadow: 0 4px 12px rgba(61, 58, 55, 0.25); border: 2px solid #FFF;
+      transition: all 0.2s ease;
+    }
+    .custom-pin:hover {
+      background: var(--accent-hover);
+      transform: rotate(-45deg) scale(1.1);
     }
     .custom-pin span { transform: rotate(45deg); font-size: 12px; font-weight: 700; }
   </style>
@@ -208,18 +201,18 @@
     </div>
     <div class="header-btns">
       <button onclick="getUserLocation()" id="locateBtn" class="btn">
-        <i data-lucide="navigation" style="width:14px;height:14px;color:var(--wood);"></i>
+        <i data-lucide="navigation" style="width:14px;height:14px;color:var(--accent);"></i>
         <span id="locateText">定位</span>
       </button>
       <button id="authBtn" onclick="handleAuthClick()" class="btn">
-        <i data-lucide="lock" style="width:14px;height:14px;color:var(--wood);"></i>
+        <i data-lucide="lock" style="width:14px;height:14px;color:var(--accent);"></i>
         <span id="authBtnText">管理員</span>
       </button>
       <button id="backupBtn" onclick="openSyncModal()" class="btn hidden">
-        <i data-lucide="download" style="width:14px;height:14px;color:var(--wood);"></i>
+        <i data-lucide="download" style="width:14px;height:14px;color:var(--accent);"></i>
         <span>備份</span>
       </button>
-      <button id="addSpotBtn" onclick="openEditModal(null)" class="btn btn-wood hidden">
+      <button id="addSpotBtn" onclick="openEditModal(null)" class="btn btn-accent hidden">
         <i data-lucide="plus" style="width:14px;height:14px;"></i>
         <span>新增機位</span>
       </button>
@@ -231,7 +224,7 @@
       <div class="map-header">
         <div>
           <h2 style="font-size:14px;font-weight:700;">機位分佈地圖</h2>
-          <span style="font-size:11px;color:var(--text-muted);">極簡日系冷淡風 · 標註行政區與機位</span>
+          <span style="font-size:11px;color:#78736E;">極簡日系柔和色調 · 霧藍灰機位圖標</span>
         </div>
         <div style="display:flex;gap:6px;">
           <button onclick="focusAllSpots()" class="btn">全覽</button>
@@ -240,7 +233,7 @@
         </div>
       </div>
       <div id="map"></div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#78736E;margin-top:8px;">
         <span>💡 點選卡片「在地圖查看」聚焦標記，點「Google 導航」開啟路線規劃。</span>
         <span id="spotCountText">載入中...</span>
       </div>
@@ -265,11 +258,11 @@
         <h3 style="font-size:15px;font-weight:700;">管理員模式</h3>
         <button onclick="closeAuthModal()" style="border:none;background:none;cursor:pointer;"><i data-lucide="x"></i></button>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">請輸入 4 位數管理密碼：</p>
+      <p style="font-size:12px;color:#78736E;margin-bottom:14px;">請輸入 4 位數管理密碼（預設：1030）：</p>
       <input type="password" id="authPassword" placeholder="輸入密碼" class="form-control" style="text-align:center;font-size:16px;letter-spacing:4px;margin-bottom:16px;" onkeydown="if(event.key==='Enter')verifyPassword()">
       <div style="display:flex;gap:8px;">
         <button onclick="closeAuthModal()" class="btn" style="flex:1;justify-content:center;">取消</button>
-        <button onclick="verifyPassword()" class="btn btn-wood" style="flex:1;justify-content:center;">解鎖</button>
+        <button onclick="verifyPassword()" class="btn btn-accent" style="flex:1;justify-content:center;">解鎖</button>
       </div>
     </div>
   </div>
@@ -340,11 +333,11 @@
         </div>
       </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-top:1px solid var(--border-color);padding-top:12px;">
         <button type="button" id="deleteSpotBtn" onclick="deleteCurrentSpot()" class="btn hidden" style="color:#E11D48;border-color:#FECDD3;">刪除此機位</button>
         <div style="display:flex;gap:8px;margin-left:auto;">
           <button type="button" onclick="closeEditModal()" class="btn">取消</button>
-          <button type="button" onclick="saveSpotData()" class="btn btn-wood">儲存機位</button>
+          <button type="button" onclick="saveSpotData()" class="btn btn-accent">儲存機位</button>
         </div>
       </div>
     </div>
@@ -358,14 +351,14 @@
         <button onclick="closeSyncModal()" style="border:none;background:none;cursor:pointer;"><i data-lucide="x"></i></button>
       </div>
       <div style="font-size:12px;display:flex;flex-direction:column;gap:12px;">
-        <div style="background:var(--bg-warm);padding:12px;border-radius:10px;border:1px solid var(--border);">
+        <div style="background:var(--bg-main);padding:12px;border-radius:10px;border:1px solid var(--border-color);">
           <p style="font-weight:700;margin-bottom:8px;">方式一：純文字一鍵備份（複製到 LINE 最方便）</p>
           <div style="display:flex;gap:8px;">
             <button onclick="copyBackupToClipboard()" class="btn" style="flex:1;justify-content:center;">📋 複製代碼</button>
-            <button onclick="pasteBackupFromText()" class="btn btn-wood" style="flex:1;justify-content:center;">📥 貼上代碼同步</button>
+            <button onclick="pasteBackupFromText()" class="btn btn-accent" style="flex:1;justify-content:center;">📥 貼上代碼同步</button>
           </div>
         </div>
-        <div style="background:var(--bg-warm);padding:12px;border-radius:10px;border:1px solid var(--border);">
+        <div style="background:var(--bg-main);padding:12px;border-radius:10px;border:1px solid var(--border-color);">
           <p style="font-weight:700;margin-bottom:8px;">方式二：JSON 檔案備份</p>
           <div style="display:flex;gap:8px;">
             <button onclick="exportBackupData()" class="btn" style="flex:1;justify-content:center;">下載備份檔</button>
@@ -380,7 +373,7 @@
   </div>
 
   <!-- Lightbox 大圖檢視 -->
-  <div id="lightboxModal" class="modal-backdrop hidden" style="background:rgba(0,0,0,0.92);flex-direction:column;justify-content:space-between;color:#FFF;">
+  <div id="lightboxModal" class="modal-backdrop hidden" style="background:rgba(61, 58, 55, 0.94);flex-direction:column;justify-content:space-between;color:#FFF;">
     <div style="width:100%;max-width:800px;display:flex;justify-content:space-between;align-items:center;">
       <div>
         <h4 id="lightboxTitle" style="font-size:14px;font-weight:700;"></h4>
@@ -561,7 +554,6 @@
       document.getElementById('spotCountText').textContent = `共標記 ${spots.length} 處攝影點`;
     }
 
-    // 免 API Key 的日系極簡・高冷白底圖資設定
     function initMap() {
       map = L.map('map', { zoomControl: true }).setView([35.5017, 138.7575], 11);
       
@@ -596,12 +588,12 @@
 
         const popup = `
           <div style="font-size:12px;padding:4px;min-width:180px;">
-            <p style="font-weight:700;color:#2C2B29;">#${i + 1} ${spot.name}</p>
-            <p style="color:#7A7670;font-size:11px;margin:4px 0;">${spot.address || ''}</p>
+            <p style="font-weight:700;color:var(--text-main);">#${i + 1} ${spot.name}</p>
+            <p style="color:#78736E;font-size:11px;margin:4px 0;">${spot.address || ''}</p>
             <div style="display:flex;gap:6px;margin-top:6px;">
               <button onclick="scrollToCard('${spot.id}')" class="btn" style="flex:1;padding:3px 6px;">卡片</button>
               ${editBtnHtml}
-              <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;padding:3px 6px;text-align:center;">導航</a>
+              <a href="${nav}" target="_blank" class="btn btn-accent" style="flex:1;padding:3px 6px;text-align:center;">導航</a>
             </div>
           </div>
         `;
@@ -625,7 +617,6 @@
         const cover = (spot.images && spot.images.length > 0) ? spot.images[0] : '';
         const nav = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
 
-        // 管理員模式下在卡片底部注入編輯按鈕
         let adminActionHtml = '';
         if (isAdmin) {
           adminActionHtml = `<button onclick="openEditModal('${spot.id}')" class="btn btn-edit" style="flex:1;justify-content:center;">✏️ 編輯機位</button>`;
@@ -642,7 +633,7 @@
           </div>
           <div class="card-body">
             <div>
-              <span style="font-size:11px;color:var(--wood);font-weight:600;">#${cardNum} ${spot.region === 'fuji' ? '富士山 / 河口湖' : '東京市區'}</span>
+              <span style="font-size:11px;color:var(--accent);font-weight:600;">#${cardNum} ${spot.region === 'fuji' ? '富士山 / 河口湖' : '東京市區'}</span>
               <h3 class="card-title">${spot.name}</h3>
               <p class="card-address">${spot.address || '日本'}</p>
             </div>
@@ -653,7 +644,7 @@
             <div class="card-actions">
               <button onclick="focusSpot('${spot.id}')" class="btn" style="flex:1;justify-content:center;">在地圖查看</button>
               ${adminActionHtml}
-              <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;justify-content:center;">導航</a>
+              <a href="${nav}" target="_blank" class="btn btn-accent" style="flex:1;justify-content:center;">導航</a>
             </div>
           </div>
         `;
@@ -707,7 +698,7 @@
         document.getElementById('locateText').textContent = '已定位';
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
-        L.circleMarker([lat, lng], { radius: 7, color: '#3B82F6', fillColor: '#60A5FA', fillOpacity: 0.9 }).addTo(map).bindPopup('您的位置').openPopup();
+        L.circleMarker([lat, lng], { radius: 7, color: '#8D99AE', fillColor: '#B0B9C6', fillOpacity: 0.9 }).addTo(map).bindPopup('您的位置').openPopup();
         map.setView([lat, lng], 13);
       }, () => {
         document.getElementById('locateText').textContent = '定位';
@@ -747,958 +738,6 @@
       document.getElementById('authBtnText').textContent = isAdmin ? '鎖定退出' : '管理員';
       document.getElementById('backupBtn').classList.toggle('hidden', !isAdmin);
       document.getElementById('addSpotBtn').classList.toggle('hidden', !isAdmin);
-      // 關鍵更新：重新渲染卡片與地圖圖釘以套用/隱藏「編輯」按鈕
-      renderSpots();
-      renderMarkers();
-      lucide.createIcons();
-    }
-
-    function openEditModal(spotId) {
-      if (!isAdmin) return alert('需要管理員權限');
-      document.getElementById('editModal').classList.remove('hidden');
-      const deleteBtn = document.getElementById('deleteSpotBtn');
-
-      if (spotId) {
-        const spot = spots.find(s => s.id === spotId);
-        document.getElementById('modalTitle').textContent = `編輯機位：${spot.name}`;
-        document.getElementById('editSpotId').value = spot.id;
-        document.getElementById('editName').value = spot.name || '';
-        document.getElementById('editRegion').value = spot.region || 'tokyo';
-        document.getElementById('editAddress').value = spot.address || '';
-        document.getElementById('editLat').value = spot.lat || '';
-        document.getElementById('editLng').value = spot.lng || '';
-        document.getElementById('editLens').value = spot.lens || '';
-        document.getElementById('editTime').value = spot.bestTime || '';
-        document.getElementById('editNotes').value = spot.notes || '';
-        currentModalPhotos = spot.images ? [...spot.images] : [];
-        deleteBtn.classList.remove('hidden');
-      } else {
-        document.getElementById('modalTitle').textContent = '新增攝影機位';
-        document.getElementById('editSpotId').value = '';
-        document.getElementById('editName').value = '';
-        document.getElementById('editRegion').value = 'fuji';
-        document.getElementById('editAddress').value = '';
-        document.getElementById('editLat').value = '';
-        document.getElementById('editLng').value = '';
-        document.getElementById('editLens').value = '';
-        document.getElementById('editTime').value = '';
-        document.getElementById('editNotes').value = '';
-        currentModalPhotos = [];
-        deleteBtn.classList.add('hidden');
-      }
-      renderModalPhotos();
-      lucide.createIcons();
-    }
-
-    function closeEditModal() {
-      document.getElementById('editModal').classList.add('hidden');
-    }
-
-    function deleteCurrentSpot() {
-      if (!isAdmin) return;
-      const id = document.getElementById('editSpotId').value;
-      if (confirm('確定要刪除此機位嗎？')) {
-        spots = spots.filter(s => s.id !== id);
-        saveSpots();
-        renderMarkers();
-        renderSpots();
-        closeEditModal();
-      }
-    }
-
-    function saveSpotData() {
-      const id = document.getElementById('editSpotId').value;
-      const name = document.getElementById('editName').value.trim();
-      const region = document.getElementById('editRegion').value;
-      const address = document.getElementById('editAddress').value.trim();
-      let lat = parseFloat(document.getElementById('editLat').value);
-      let lng = parseFloat(document.getElementById('editLng').value);
-      const lens = document.getElementById('editLens').value.trim();
-      const bestTime = document.getElementById('editTime').value.trim();
-      const notes = document.getElementById('editNotes').value.trim();
-
-      if (!name) return alert('請填寫機位名稱');
-
-      if (isNaN(lat) || isNaN(lng)) {
-        lat = region === 'fuji' ? 35.5017 : 35.6812;
-        lng = region === 'fuji' ? 138.7575 : 139.7671;
-      }
-
-      const spotData = {
-        id: id || ('custom-' + Date.now()),
-        name, region, address, lat, lng, lens, bestTime, notes,
-        images: currentModalPhotos.length > 0 ? [...currentModalPhotos] : ["https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=800&q=75"]
-      };
-
-      if (id) {
-        const idx = spots.findIndex(s => s.id === id);
-        if (idx !== -1) spots[idx] = spotData;
-      } else {
-        spots.unshift(spotData);
-      }
-
-      saveSpots();
-      renderMarkers();
-      renderSpots();
-      closeEditModal();
-    }
-
-    function renderModalPhotos() {
-      const container = document.getElementById('photosList');
-      container.innerHTML = '';
-      if (currentModalPhotos.length === 0) {
-        container.innerHTML = '<span style="font-size:11px;color:#999;align-self:center;">目前無照片</span>';
-        return;
-      }
-      currentModalPhotos.forEach((src, i) => {
-        const div = document.createElement('div');
-        div.className = 'photo-item';
-        div.innerHTML = `
-          <img src="${src}">
-          <button type="button" class="photo-del" onclick="removePhoto(${i})">✕</button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function removePhoto(idx) {
-      currentModalPhotos.splice(idx, 1);
-      renderModalPhotos();
-    }
-
-    function handleImageUpload(e) {
-      const files = e.target.files;
-      if (!files || files.length === 0) return;
-      document.getElementById('uploadLabelText').textContent = '壓縮中...';
-
-      let done = 0;
-      Array.from(files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          const img = new Image();
-          img.onload = () => {
-            const max = 600;
-            let w = img.width, h = img.height;
-            if (w > max || h > max) {
-              if (w > h) { h = Math.round((h * max) / w); w = max; }
-              else { w = Math.round((w * max) / h); h = max; }
-            }
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            currentModalPhotos.push(canvas.toDataURL('image/jpeg', 0.55));
-            done++;
-            if (done === files.length) {
-              document.getElementById('uploadLabelText').textContent = '選擇手機/電腦相片';
-              renderModalPhotos();
-            }
-          };
-          img.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-      e.target.value = '';
-    }
-
-    function openSyncModal() {
-      if (!isAdmin) return alert('需要管理員權限');
-      document.getElementById('syncModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeSyncModal() {
-      document.getElementById('syncModal').classList.add('hidden');
-    }
-
-    function copyBackupToClipboard() {
-      navigator.clipboard.writeText(JSON.stringify(spots)).then(() => alert('已複製備份代碼！'));
-    }
-
-    function pasteBackupFromText() {
-      const t = prompt('請貼上備份文字：');
-      if (t) {
-        try {
-          const d = JSON.parse(t);
-          if (Array.isArray(d)) {
-            spots = d;
-            saveSpots();
-            renderMarkers();
-            renderSpots();
-            closeSyncModal();
-            alert('同步成功！');
-          }
-        } catch(e) { alert('代碼格式錯誤'); }
-      }
-    }
-
-    function exportBackupData() {
-      const blob = new Blob(["\uFEFF" + JSON.stringify(spots, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `japan_spots_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
-
-    function importBackupData(e) {
-      const f = e.target.files[0];
-      if (!f) return;
-      const r = new FileReader();
-      r.onload = ev => {
-        try {
-          const d = JSON.parse(ev.target.result);
-          if (Array.isArray(d)) {
-            spots = d;
-            saveSpots();
-            renderMarkers();
-            renderSpots();
-            closeSyncModal();
-            alert('匯入成功！');
-          }
-        } catch(err) { alert('解析失敗'); }
-      };
-      r.readAsText(f);
-    }
-
-    function openLightbox(id, idx) {
-      const s = spots.find(x => x.id === id);
-      if (!s || !s.images || s.images.length === 0) return;
-      currentSpot = s;
-      currentSpotIndex = idx;
-      document.getElementById('lightboxTitle').textContent = s.name;
-      document.getElementById('lightboxIndex').textContent = `${idx + 1} / ${s.images.length}`;
-      document.getElementById('lightboxImg').src = s.images[idx];
-      document.getElementById('lightboxCaption').textContent = s.notes || '';
-      document.getElementById('lightboxModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeLightbox() {
-      document.getElementById('lightboxModal').classList.add('hidden');
-    }
-  </script>
-</body>
-</html>
-      --bg-warm: #FAF9F6;
-      --card-bg: #FFFFFF;
-      --border: #E8E5DF;
-      --text-main: #2C2B29;
-      --text-muted: #7A7670;
-      --wood: #9E8265;
-      --wood-hover: #876D53;
-      --wood-light: #F4EFEB;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      background-color: var(--bg-warm); 
-      color: var(--text-main); 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans TC", sans-serif;
-      padding-bottom: 60px;
-      -webkit-font-smoothing: antialiased;
-    }
-    header {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(250, 249, 246, 0.95);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border);
-      height: 64px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 16px; max-width: 1100px; margin: 0 auto;
-    }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .icon-box {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--wood-light); color: var(--wood);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .title-area h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.6px; color: var(--text-main); }
-    .title-area p { font-size: 11px; color: var(--text-muted); }
-    .header-btns { display: flex; gap: 8px; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 6px 12px; font-size: 12px; border-radius: 8px;
-      border: 1px solid var(--border); background: #FFF;
-      color: var(--text-muted); cursor: pointer; text-decoration: none;
-      transition: all 0.2s ease;
-    }
-    .btn:hover { background: #F8F7F4; border-color: #DCD8D0; }
-    .btn-wood { background: var(--wood); color: #FFF; border: none; font-weight: 600; }
-    .btn-wood:hover { background: var(--wood-hover); }
-    .btn-edit { background: #F4EFEB; color: var(--wood); border: 1px solid #E4DDD3; font-weight: 600; }
-    .btn-edit:hover { background: #EAE3DB; }
-
-    main { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
-    .section-card {
-      background: var(--card-bg); border-radius: 16px;
-      border: 1px solid var(--border); padding: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-    }
-    .map-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
-    
-    #map { 
-      width: 100%; height: 360px; border-radius: 12px; 
-      border: 1px solid var(--border); z-index: 10; position: relative; 
-      background: #F4F4F2;
-    }
-    .leaflet-japanese-clean {
-      filter: grayscale(88%) contrast(92%) brightness(104%);
-    }
-
-    .filter-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-    .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    .filter-btn {
-      padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
-      border: 1px solid var(--border); background: #FFF; color: var(--text-muted); cursor: pointer;
-      transition: all 0.2s;
-    }
-    .filter-btn.active { background: var(--text-main); color: #FFF; border-color: var(--text-main); }
-    .search-input {
-      padding: 7px 16px; border-radius: 20px; font-size: 12px;
-      border: 1px solid var(--border); width: 100%; max-width: 240px; outline: none;
-      background: #FFF;
-    }
-    .search-input:focus { border-color: var(--wood); }
-
-    .grid-cards {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
-    .card {
-      background: #FFF; border-radius: 16px; border: 1px solid var(--border);
-      overflow: hidden; display: flex; flex-direction: column;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
-    .card-img-wrap {
-      position: relative; height: 190px; background: #ECEAE4; cursor: pointer; overflow: hidden;
-    }
-    .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-    .card:hover .card-img-wrap img { transform: scale(1.03); }
-    .badge-index {
-      position: absolute; top: 10px; left: 10px; width: 28px; height: 28px;
-      border-radius: 50%; background: rgba(44, 43, 41, 0.92); color: #FFF;
-      font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center;
-      border: 1.5px solid #FFF;
-    }
-    .badge-photos {
-      position: absolute; bottom: 8px; right: 10px; padding: 2px 8px;
-      border-radius: 12px; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
-      color: #FFF; font-size: 11px;
-    }
-    .card-body { padding: 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
-    .card-title { font-size: 14px; font-weight: 700; margin-top: 2px; letter-spacing: 0.3px; }
-    .card-address { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .info-box {
-      background: var(--bg-warm); border-radius: 10px; padding: 8px 10px;
-      font-size: 11px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border);
-    }
-    .card-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-
-    /* Modal 彈窗層級強制置頂 9999 */
-    .modal-backdrop {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(44, 43, 41, 0.6);
-      backdrop-filter: blur(5px);
-      z-index: 9999;
-      display: flex; align-items: center; justify-content: center;
-      padding: 16px;
-    }
-    .modal-box {
-      background: #FFFFFF; border-radius: 16px; width: 100%; max-width: 500px;
-      max-height: 90vh; overflow-y: auto; padding: 22px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-      position: relative; z-index: 10000;
-    }
-    .modal-head { 
-      display: flex; justify-content: space-between; align-items: center; 
-      margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; 
-    }
-    .hidden { display: none !important; }
-
-    /* 表單樣式 */
-    .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
-    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-main); }
-    .form-control {
-      width: 100%; padding: 8px 12px; border-radius: 8px;
-      border: 1px solid var(--border); font-size: 12px; outline: none;
-    }
-    .form-control:focus { border-color: var(--wood); }
-
-    .photos-list {
-      display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;
-      background: var(--bg-warm); padding: 8px; border-radius: 10px;
-      border: 1px solid var(--border); margin-bottom: 8px;
-    }
-    .photo-item {
-      position: relative; width: 64px; height: 64px; border-radius: 8px;
-      overflow: hidden; border: 1px solid var(--border);
-    }
-    .photo-item img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-del {
-      position: absolute; top: 2px; right: 2px; background: rgba(225,29,72,0.85);
-      color: #FFF; width: 18px; height: 18px; border-radius: 50%;
-      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px;
-    }
-
-    .custom-pin {
-      width: 32px; height: 32px; background: var(--wood); color: #FFF;
-      border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.22); border: 2px solid #FFF;
-    }
-    .custom-pin span { transform: rotate(45deg); font-size: 12px; font-weight: 700; }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="header-left">
-      <div class="icon-box"><i data-lucide="camera" style="width:18px;height:18px;"></i></div>
-      <div class="title-area">
-        <h1>JAPAN LENS GUIDE</h1>
-        <p>東京 ＆ 富士山攝影機位指南</p>
-      </div>
-    </div>
-    <div class="header-btns">
-      <button onclick="getUserLocation()" id="locateBtn" class="btn">
-        <i data-lucide="navigation" style="width:14px;height:14px;color:var(--wood);"></i>
-        <span id="locateText">定位</span>
-      </button>
-      <button id="authBtn" onclick="handleAuthClick()" class="btn">
-        <i data-lucide="lock" style="width:14px;height:14px;color:var(--wood);"></i>
-        <span id="authBtnText">管理員</span>
-      </button>
-      <button id="backupBtn" onclick="openSyncModal()" class="btn hidden">
-        <i data-lucide="download" style="width:14px;height:14px;color:var(--wood);"></i>
-        <span>備份</span>
-      </button>
-      <button id="addSpotBtn" onclick="openEditModal(null)" class="btn btn-wood hidden">
-        <i data-lucide="plus" style="width:14px;height:14px;"></i>
-        <span>新增機位</span>
-      </button>
-    </div>
-  </header>
-
-  <main>
-    <section class="section-card">
-      <div class="map-header">
-        <div>
-          <h2 style="font-size:14px;font-weight:700;">機位分佈地圖</h2>
-          <span style="font-size:11px;color:var(--text-muted);">極簡日系冷淡風 · 標註行政區與機位</span>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button onclick="focusAllSpots()" class="btn">全覽</button>
-          <button onclick="focusRegion('fuji')" class="btn">富士山</button>
-          <button onclick="focusRegion('tokyo')" class="btn">東京</button>
-        </div>
-      </div>
-      <div id="map"></div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:8px;">
-        <span>💡 點選卡片「在地圖查看」聚焦標記，點「Google 導航」開啟路線規劃。</span>
-        <span id="spotCountText">載入中...</span>
-      </div>
-    </section>
-
-    <div class="filter-bar">
-      <div class="filter-group">
-        <button onclick="setFilter('all')" class="filter-btn active" data-filter="all">全部機位</button>
-        <button onclick="setFilter('fuji')" class="filter-btn" data-filter="fuji">富士山 / 河口湖</button>
-        <button onclick="setFilter('tokyo')" class="filter-btn" data-filter="tokyo">東京市區</button>
-      </div>
-      <input type="text" id="searchInput" oninput="handleSearch()" placeholder="搜尋景點、鏡頭焦段..." class="search-input">
-    </div>
-
-    <div id="spotsGrid" class="grid-cards"></div>
-  </main>
-
-  <!-- 管理員認證彈窗 -->
-  <div id="authModal" class="modal-backdrop hidden">
-    <div class="modal-box" style="max-width:340px;text-align:center;">
-      <div class="modal-head">
-        <h3 style="font-size:15px;font-weight:700;">管理員模式</h3>
-        <button onclick="closeAuthModal()" style="border:none;background:none;cursor:pointer;"><i data-lucide="x"></i></button>
-      </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">請輸入 4 位數管理密碼：</p>
-      <input type="password" id="authPassword" placeholder="輸入密碼" class="form-control" style="text-align:center;font-size:16px;letter-spacing:4px;margin-bottom:16px;" onkeydown="if(event.key==='Enter')verifyPassword()">
-      <div style="display:flex;gap:8px;">
-        <button onclick="closeAuthModal()" class="btn" style="flex:1;justify-content:center;">取消</button>
-        <button onclick="verifyPassword()" class="btn btn-wood" style="flex:1;justify-content:center;">解鎖</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 編輯 / 新增機位彈窗 -->
-  <div id="editModal" class="modal-backdrop hidden">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3 id="modalTitle" style="font-size:15px;font-weight:700;">編輯機位</h3>
-        <button onclick="closeEditModal()" style="border:none;background:none;cursor:pointer;"><i data-lucide="x"></i></button>
-      </div>
-      <input type="hidden" id="editSpotId">
-
-      <div class="form-group">
-        <label>機位名稱 *</label>
-        <input type="text" id="editName" placeholder="例如：日川時計店" class="form-control">
-      </div>
-
-      <div class="form-group">
-        <label>所屬分區</label>
-        <select id="editRegion" class="form-control">
-          <option value="fuji">富士山 / 河口湖</option>
-          <option value="tokyo">東京市區</option>
-          <option value="other">其他地點</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>地址或地標名稱（供 Google 導航使用）</label>
-        <input type="text" id="editAddress" placeholder="例如：山梨県富士吉田市下吉田３丁目５−１６" class="form-control">
-      </div>
-
-      <div style="display:flex;gap:8px;">
-        <div class="form-group" style="flex:1;">
-          <label>緯度 (Lat, 選填)</label>
-          <input type="number" step="any" id="editLat" placeholder="例: 35.492" class="form-control">
-        </div>
-        <div class="form-group" style="flex:1;">
-          <label>經度 (Lng, 選填)</label>
-          <input type="number" step="any" id="editLng" placeholder="例: 138.804" class="form-control">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>推薦焦段</label>
-        <input type="text" id="editLens" placeholder="例如：70-200mm 長焦壓縮" class="form-control">
-      </div>
-
-      <div class="form-group">
-        <label>最佳拍攝時段</label>
-        <input type="text" id="editTime" placeholder="例如：清晨 07:00 前（順光無人）" class="form-control">
-      </div>
-
-      <div class="form-group">
-        <label>構圖心法與踩坑提醒</label>
-        <textarea id="editNotes" rows="2" placeholder="注意事項..." class="form-control"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>示範照片（支援多張上傳，自動壓縮）</label>
-        <div id="photosList" class="photos-list"></div>
-        <div style="display:flex;gap:6px;">
-          <label class="btn" style="flex:1;justify-content:center;cursor:pointer;">
-            <i data-lucide="image-plus" style="width:14px;height:14px;"></i>
-            <span id="uploadLabelText">選擇手機/電腦相片</span>
-            <input type="file" id="imageFileInput" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
-          </label>
-        </div>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-top:1px solid var(--border);padding-top:12px;">
-        <button type="button" id="deleteSpotBtn" onclick="deleteCurrentSpot()" class="btn hidden" style="color:#E11D48;border-color:#FECDD3;">刪除此機位</button>
-        <div style="display:flex;gap:8px;margin-left:auto;">
-          <button type="button" onclick="closeEditModal()" class="btn">取消</button>
-          <button type="button" onclick="saveSpotData()" class="btn btn-wood">儲存機位</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 資料備份彈窗 -->
-  <div id="syncModal" class="modal-backdrop hidden">
-    <div class="modal-box">
-      <div class="modal-head">
-        <h3 style="font-size:15px;font-weight:700;">資料備份與轉移</h3>
-        <button onclick="closeSyncModal()" style="border:none;background:none;cursor:pointer;"><i data-lucide="x"></i></button>
-      </div>
-      <div style="font-size:12px;display:flex;flex-direction:column;gap:12px;">
-        <div style="background:var(--bg-warm);padding:12px;border-radius:10px;border:1px solid var(--border);">
-          <p style="font-weight:700;margin-bottom:8px;">方式一：純文字一鍵備份（複製到 LINE 最方便）</p>
-          <div style="display:flex;gap:8px;">
-            <button onclick="copyBackupToClipboard()" class="btn" style="flex:1;justify-content:center;">📋 複製代碼</button>
-            <button onclick="pasteBackupFromText()" class="btn btn-wood" style="flex:1;justify-content:center;">📥 貼上代碼同步</button>
-          </div>
-        </div>
-        <div style="background:var(--bg-warm);padding:12px;border-radius:10px;border:1px solid var(--border);">
-          <p style="font-weight:700;margin-bottom:8px;">方式二：JSON 檔案備份</p>
-          <div style="display:flex;gap:8px;">
-            <button onclick="exportBackupData()" class="btn" style="flex:1;justify-content:center;">下載備份檔</button>
-            <label class="btn" style="flex:1;justify-content:center;cursor:pointer;">
-              <span>匯入備份檔</span>
-              <input type="file" accept=".json" class="hidden" onchange="importBackupData(event)">
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Lightbox 大圖檢視 -->
-  <div id="lightboxModal" class="modal-backdrop hidden" style="background:rgba(0,0,0,0.92);flex-direction:column;justify-content:space-between;color:#FFF;">
-    <div style="width:100%;max-width:800px;display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <h4 id="lightboxTitle" style="font-size:14px;font-weight:700;"></h4>
-        <span id="lightboxIndex" style="font-size:12px;color:#AAA;"></span>
-      </div>
-      <button onclick="closeLightbox()" style="background:none;border:none;color:#FFF;cursor:pointer;"><i data-lucide="x"></i></button>
-    </div>
-    <div style="max-height:75vh;max-width:100%;display:flex;align-items:center;justify-content:center;">
-      <img id="lightboxImg" src="" style="max-height:75vh;max-width:100%;object-fit:contain;border-radius:8px;">
-    </div>
-    <p id="lightboxCaption" style="font-size:12px;color:#DDD;text-align:center;"></p>
-  </div>
-
-  <script>
-    const DEFAULT_SPOTS = [
-      {
-        "id": "custom-1793374095735",
-        "name": "ogino十字路口",
-        "region": "fuji",
-        "address": "山梨県南都留郡富士河口湖町船津３",
-        "lat": 35.501753,
-        "lng": 138.757509,
-        "lens": "70-200mm 長焦壓縮視角",
-        "bestTime": "清晨 06:00 - 10:00",
-        "notes": "下吉田至河口湖間的開闊十字路口，長焦拍攝街景車流與雄偉雪頂富士山同框。",
-        "images": ["https://images.unsplash.com/photo-1492571350019-22de08371fd3?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "fuji-nikkawa",
-        "name": "日川時計店（下吉田商店街）",
-        "region": "fuji",
-        "address": "山梨県富士吉田市下吉田３丁目５−１６",
-        "lat": 35.49216,
-        "lng": 138.80455,
-        "lens": "70-200mm 長焦壓縮視角",
-        "bestTime": "清晨 06:30 - 08:00（順光少人車）",
-        "notes": "極具縱深感的昭和復古街道直通巨大雪頂富士山。",
-        "images": ["https://images.unsplash.com/photo-1578637387939-43c525550085?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "fuji-tenjoyama",
-        "name": "天上山公園（富士山全景纜車 & 絕景鞦韆）",
-        "region": "fuji",
-        "address": "山梨県南都留郡富士河口湖町浅川1163-1",
-        "lat": 35.50392,
-        "lng": 138.77353,
-        "lens": "24-70mm 標準變焦 / 35mm 人像",
-        "bestTime": "上午 09:00 前或日落黃金時刻",
-        "notes": "搭乘纜車登頂，俯瞰河口湖全貌與絕景巨型盪鞦韆。",
-        "images": ["https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "fuji-arakurayama",
-        "name": "新倉山淺間公園（忠靈塔）",
-        "region": "fuji",
-        "address": "山梨県富士吉田市浅間２丁目４−１",
-        "lat": 35.501250,
-        "lng": 138.801650,
-        "lens": "16-35mm 超廣角 / 24-70mm",
-        "bestTime": "清晨 06:00 - 07:30 晨光",
-        "notes": "五重塔與富士山同框，全球最經典的日本明信片機位。",
-        "images": ["https://images.unsplash.com/photo-1526481280693-3bfa7568e0f3?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "fuji-lawson",
-        "name": "LAWSON 羅森便利商店（河口湖站前店）",
-        "region": "fuji",
-        "address": "山梨県南都留郡富士河口湖町船津３６３６−２",
-        "lat": 35.498800,
-        "lng": 138.767800,
-        "lens": "50mm 定焦 / 70-200mm",
-        "bestTime": "清晨天亮時刻",
-        "notes": "藍白超商招牌屋頂上聳立宏偉富士山。",
-        "images": ["https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "fuji-oishi",
-        "name": "大石公園（花海 ＆ 河口湖逆富士）",
-        "region": "fuji",
-        "address": "山梨県南都留郡富士河口湖町大石２５８５",
-        "lat": 35.522850,
-        "lng": 138.745600,
-        "lens": "16-35mm 廣角 / 24-70mm",
-        "bestTime": "清晨 06:00 - 08:00（水面無風）",
-        "notes": "河口湖北岸視野最寬闊的花園，湖畔步道低角度倒影。",
-        "images": ["https://images.unsplash.com/photo-1570459027562-4a916cc6113f?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "tokyo-akabanebashi",
-        "name": "東京鐵塔 · 赤羽橋站地下道出口",
-        "region": "tokyo",
-        "address": "東京都港区東麻布１丁目",
-        "lat": 35.654820,
-        "lng": 139.743850,
-        "lens": "16-35mm 超廣角直幅仰拍",
-        "bestTime": "傍晚鐵塔點燈後",
-        "notes": "人行通道階梯形成引導線框架，廣角仰拍發光東京鐵塔。",
-        "images": ["https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "tokyo-jikken-bridge",
-        "name": "晴空塔 · 十間橋（平靜水渠逆晴空塔）",
-        "region": "tokyo",
-        "address": "東京都墨田区業平５丁目",
-        "lat": 35.709320,
-        "lng": 139.818450,
-        "lens": "12-24mm 或 16mm 超廣角",
-        "bestTime": "傍晚點燈後至深夜",
-        "notes": "水面平靜無浪，將 634 公尺晴空塔及其水面倒影完全收納。",
-        "images": ["https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "tokyo-roppongi-hills",
-        "name": "六本木之丘展望台（Tokyo City View）",
-        "region": "tokyo",
-        "address": "東京都港区六本木６丁目１０−１",
-        "lat": 35.660460,
-        "lng": 139.729240,
-        "lens": "24-70mm / 70-200mm 長焦",
-        "bestTime": "藍調時刻（日落後半小時）",
-        "notes": "拍攝東京鐵塔全景與首都高車軌的最佳觀景台。",
-        "images": ["https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=75"]
-      },
-      {
-        "id": "tokyo-shinjuku-yokocho",
-        "name": "新宿思出橫丁（Omoide Yokocho）",
-        "region": "tokyo",
-        "address": "東京都新宿区西新宿１丁目２",
-        "lat": 35.693150,
-        "lng": 139.699850,
-        "lens": "35mm 或 50mm 大光圈定焦",
-        "bestTime": "夜間 18:30 - 21:00",
-        "notes": "濃厚的昭和懷舊小巷，紅色燈籠是東京夜間街拍首選。",
-        "images": ["https://images.unsplash.com/photo-1554797589-7241abc22097?auto=format&fit=crop&w=800&q=75"]
-      }
-    ];
-
-    let spots = [];
-    let map = null;
-    let markersLayer = null;
-    let currentFilter = 'all';
-    let searchQuery = '';
-    let isAdmin = false;
-    let currentModalPhotos = [];
-    let currentSpotIndex = 0;
-    let currentSpot = null;
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadSpots();
-      initMap();
-      renderSpots();
-      lucide.createIcons();
-    });
-
-    function loadSpots() {
-      try {
-        const saved = localStorage.getItem('japan_lens_spots_stable');
-        if (saved && saved.startsWith('[')) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            spots = parsed.filter(s => s.id !== 'tokyo-shibuyasky');
-            return;
-          }
-        }
-      } catch (e) {}
-      spots = [...DEFAULT_SPOTS];
-      saveSpots();
-    }
-
-    function saveSpots() {
-      try {
-        localStorage.setItem('japan_lens_spots_stable', JSON.stringify(spots));
-      } catch (e) {}
-      updateCount();
-    }
-
-    function updateCount() {
-      document.getElementById('spotCountText').textContent = `共標記 ${spots.length} 處攝影點`;
-    }
-
-    // 免 API Key 的日系極簡・高冷白底圖資設定
-    function initMap() {
-      map = L.map('map', { zoomControl: true }).setView([35.5017, 138.7575], 11);
-      
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap',
-        className: 'leaflet-japanese-clean'
-      }).addTo(map);
-
-      markersLayer = L.layerGroup().addTo(map);
-      renderMarkers();
-    }
-
-    function renderMarkers() {
-      if (!markersLayer) return;
-      markersLayer.clearLayers();
-      spots.forEach((spot, i) => {
-        if (!spot.lat || !spot.lng) return;
-        const icon = L.divIcon({
-          className: '',
-          html: `<div class="custom-pin"><span>${i + 1}</span></div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 32],
-          popupAnchor: [0, -30]
-        });
-        const nav = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
-        
-        let editBtnHtml = '';
-        if (isAdmin) {
-          editBtnHtml = `<button onclick="openEditModal('${spot.id}')" class="btn btn-edit" style="flex:1;padding:3px 6px;">編輯</button>`;
-        }
-
-        const popup = `
-          <div style="font-size:12px;padding:4px;min-width:180px;">
-            <p style="font-weight:700;color:#2C2B29;">#${i + 1} ${spot.name}</p>
-            <p style="color:#7A7670;font-size:11px;margin:4px 0;">${spot.address || ''}</p>
-            <div style="display:flex;gap:6px;margin-top:6px;">
-              <button onclick="scrollToCard('${spot.id}')" class="btn" style="flex:1;padding:3px 6px;">卡片</button>
-              ${editBtnHtml}
-              <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;padding:3px 6px;text-align:center;">導航</a>
-            </div>
-          </div>
-        `;
-        markersLayer.addLayer(L.marker([spot.lat, spot.lng], { icon }).bindPopup(popup));
-      });
-    }
-
-    function renderSpots() {
-      const container = document.getElementById('spotsGrid');
-      container.innerHTML = '';
-      let list = [...spots];
-      if (currentFilter !== 'all') list = list.filter(s => s.region === currentFilter);
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        list = list.filter(s => (s.name && s.name.toLowerCase().includes(q)) || (s.address && s.address.toLowerCase().includes(q)));
-      }
-
-      list.forEach((spot, idx) => {
-        const origIdx = spots.findIndex(s => s.id === spot.id);
-        const cardNum = origIdx !== -1 ? origIdx + 1 : idx + 1;
-        const cover = (spot.images && spot.images.length > 0) ? spot.images[0] : '';
-        const nav = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
-
-        // 管理員模式下在卡片底部注入編輯按鈕
-        let adminActionHtml = '';
-        if (isAdmin) {
-          adminActionHtml = `<button onclick="openEditModal('${spot.id}')" class="btn btn-edit" style="flex:1;justify-content:center;">✏️ 編輯機位</button>`;
-        }
-
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.id = `card-${spot.id}`;
-        card.innerHTML = `
-          <div class="card-img-wrap" onclick="openLightbox('${spot.id}', 0)">
-            <img src="${cover}" alt="${spot.name}">
-            <div class="badge-index">${cardNum}</div>
-            <div class="badge-photos">${spot.images ? spot.images.length : 0} 張照片</div>
-          </div>
-          <div class="card-body">
-            <div>
-              <span style="font-size:11px;color:var(--wood);font-weight:600;">#${cardNum} ${spot.region === 'fuji' ? '富士山 / 河口湖' : '東京市區'}</span>
-              <h3 class="card-title">${spot.name}</h3>
-              <p class="card-address">${spot.address || '日本'}</p>
-            </div>
-            <div class="info-box">
-              <span>📷 <strong>${spot.lens || '標準變焦'}</strong></span>
-              <span>⏰ ${spot.bestTime || '全天'}</span>
-            </div>
-            <div class="card-actions">
-              <button onclick="focusSpot('${spot.id}')" class="btn" style="flex:1;justify-content:center;">在地圖查看</button>
-              ${adminActionHtml}
-              <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;justify-content:center;">導航</a>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-      updateCount();
-      lucide.createIcons();
-    }
-
-    function focusSpot(id) {
-      const s = spots.find(x => x.id === id);
-      if (s && map) {
-        map.setView([s.lat, s.lng], 14);
-        document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-
-    function scrollToCard(id) {
-      const el = document.getElementById(`card-${id}`);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function focusAllSpots() {
-      if (!map || spots.length === 0) return;
-      map.fitBounds(L.latLngBounds(spots.map(s => [s.lat, s.lng])), { padding: [30, 30] });
-    }
-
-    function focusRegion(r) {
-      if (!map) return;
-      if (r === 'fuji') map.setView([35.5017, 138.7575], 11);
-      else if (r === 'tokyo') map.setView([35.6812, 139.7671], 12);
-    }
-
-    function setFilter(f) {
-      currentFilter = f;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.filter === f);
-      });
-      renderSpots();
-    }
-
-    function handleSearch() {
-      searchQuery = document.getElementById('searchInput').value;
-      renderSpots();
-    }
-
-    function getUserLocation() {
-      if (!navigator.geolocation) return alert('不支援定位');
-      document.getElementById('locateText').textContent = '定位中...';
-      navigator.geolocation.getCurrentPosition(pos => {
-        document.getElementById('locateText').textContent = '已定位';
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        L.circleMarker([lat, lng], { radius: 7, color: '#3B82F6', fillColor: '#60A5FA', fillOpacity: 0.9 }).addTo(map).bindPopup('您的位置').openPopup();
-        map.setView([lat, lng], 13);
-      }, () => {
-        document.getElementById('locateText').textContent = '定位';
-        alert('無法取得定位，請確認已開啟權限');
-      });
-    }
-
-    function handleAuthClick() {
-      if (isAdmin) {
-        if (confirm('確定退出管理員模式？')) {
-          isAdmin = false;
-          toggleAdminUI();
-        }
-      } else {
-        document.getElementById('authModal').classList.remove('hidden');
-        document.getElementById('authPassword').value = '';
-        setTimeout(() => document.getElementById('authPassword').focus(), 100);
-      }
-    }
-
-    function closeAuthModal() {
-      document.getElementById('authModal').classList.add('hidden');
-    }
-
-    function verifyPassword() {
-      if (document.getElementById('authPassword').value === '1030') {
-        isAdmin = true;
-        closeAuthModal();
-        toggleAdminUI();
-        alert('解鎖成功！卡片下方已出現「✏️ 編輯機位」按鈕。');
-      } else {
-        alert('密碼錯誤！請輸入 1030');
-      }
-    }
-
-    function toggleAdminUI() {
-      document.getElementById('authBtnText').textContent = isAdmin ? '鎖定退出' : '管理員';
-      document.getElementById('backupBtn').classList.toggle('hidden', !isAdmin);
-      document.getElementById('addSpotBtn').classList.toggle('hidden', !isAdmin);
-      // 關鍵更新：重新渲染卡片與地圖圖釘以套用/隱藏「編輯」按鈕
       renderSpots();
       renderMarkers();
       lucide.createIcons();
