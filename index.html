@@ -57,6 +57,8 @@
     .btn:hover { background: #F8F7F4; border-color: #DCD8D0; }
     .btn-wood { background: var(--wood); color: #FFF; border: none; font-weight: 600; }
     .btn-wood:hover { background: var(--wood-hover); }
+    .btn-edit { background: #F4EFEB; color: var(--wood); border: 1px solid #E4DDD3; font-weight: 600; }
+    .btn-edit:hover { background: #EAE3DB; }
 
     main { max-width: 1100px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
     .section-card {
@@ -66,7 +68,6 @@
     }
     .map-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
     
-    /* 地圖容器與日系冷色灰白濾鏡（免 API 且極具雜誌質感） */
     #map { 
       width: 100%; height: 360px; border-radius: 12px; 
       border: 1px solid var(--border); z-index: 10; position: relative; 
@@ -124,9 +125,9 @@
       background: var(--bg-warm); border-radius: 10px; padding: 8px 10px;
       font-size: 11px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border);
     }
-    .card-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .card-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
 
-    /* Modal 彈窗層級強化 */
+    /* Modal 彈窗層級強制置頂 9999 */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(44, 43, 41, 0.6);
@@ -206,7 +207,7 @@
       </button>
       <button id="addSpotBtn" onclick="openEditModal(null)" class="btn btn-wood hidden">
         <i data-lucide="plus" style="width:14px;height:14px;"></i>
-        <span>新增</span>
+        <span>新增機位</span>
       </button>
     </div>
   </header>
@@ -250,7 +251,7 @@
         <h3 style="font-size:15px;font-weight:700;">管理員模式</h3>
         <button onclick="closeAuthModal()" style="border:none;background:none;cursor:pointer;"><i data-lucide="x"></i></button>
       </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">請輸入 4 位數管理密碼：</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">請輸入 4 位數管理密碼（預設：1030）：</p>
       <input type="password" id="authPassword" placeholder="輸入密碼" class="form-control" style="text-align:center;font-size:16px;letter-spacing:4px;margin-bottom:16px;" onkeydown="if(event.key==='Enter')verifyPassword()">
       <div style="display:flex;gap:8px;">
         <button onclick="closeAuthModal()" class="btn" style="flex:1;justify-content:center;">取消</button>
@@ -573,12 +574,19 @@
           popupAnchor: [0, -30]
         });
         const nav = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
+        
+        let editBtnHtml = '';
+        if (isAdmin) {
+          editBtnHtml = `<button onclick="openEditModal('${spot.id}')" class="btn btn-edit" style="flex:1;padding:3px 6px;">編輯</button>`;
+        }
+
         const popup = `
           <div style="font-size:12px;padding:4px;min-width:180px;">
             <p style="font-weight:700;color:#2C2B29;">#${i + 1} ${spot.name}</p>
             <p style="color:#7A7670;font-size:11px;margin:4px 0;">${spot.address || ''}</p>
             <div style="display:flex;gap:6px;margin-top:6px;">
               <button onclick="scrollToCard('${spot.id}')" class="btn" style="flex:1;padding:3px 6px;">卡片</button>
+              ${editBtnHtml}
               <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;padding:3px 6px;text-align:center;">導航</a>
             </div>
           </div>
@@ -603,6 +611,12 @@
         const cover = (spot.images && spot.images.length > 0) ? spot.images[0] : '';
         const nav = `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
 
+        // 管理員模式下在卡片底部注入編輯按鈕
+        let adminActionHtml = '';
+        if (isAdmin) {
+          adminActionHtml = `<button onclick="openEditModal('${spot.id}')" class="btn btn-edit" style="flex:1;justify-content:center;">✏️ 編輯機位</button>`;
+        }
+
         const card = document.createElement('div');
         card.className = 'card';
         card.id = `card-${spot.id}`;
@@ -624,7 +638,8 @@
             </div>
             <div class="card-actions">
               <button onclick="focusSpot('${spot.id}')" class="btn" style="flex:1;justify-content:center;">在地圖查看</button>
-              <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;justify-content:center;">Google 導航</a>
+              ${adminActionHtml}
+              <a href="${nav}" target="_blank" class="btn btn-wood" style="flex:1;justify-content:center;">導航</a>
             </div>
           </div>
         `;
@@ -708,7 +723,7 @@
         isAdmin = true;
         closeAuthModal();
         toggleAdminUI();
-        alert('解鎖成功！您現在可以自由編輯、新增與備份。');
+        alert('解鎖成功！卡片下方已出現「✏️ 編輯機位」按鈕。');
       } else {
         alert('密碼錯誤！請輸入 1030');
       }
@@ -718,6 +733,9 @@
       document.getElementById('authBtnText').textContent = isAdmin ? '鎖定退出' : '管理員';
       document.getElementById('backupBtn').classList.toggle('hidden', !isAdmin);
       document.getElementById('addSpotBtn').classList.toggle('hidden', !isAdmin);
+      // 關鍵更新：重新渲染卡片與地圖圖釘以套用/隱藏「編輯」按鈕
+      renderSpots();
+      renderMarkers();
       lucide.createIcons();
     }
 
