@@ -551,11 +551,10 @@
     function initMap() {
       map = L.map('map', { zoomControl: true }).setView([35.5017, 138.7575], 11);
       
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        subdomains: 'abcd',
-        attribution: '&copy; OpenStreetMap &copy; CARTO'
-      }).addTo(map);
+     L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+  maxZoom: 20,
+  attribution: '&copy; OpenStreetMap &copy; Stadia Maps'
+}).addTo(map);
 
       markersLayer = L.layerGroup().addTo(map);
       renderMarkers();
