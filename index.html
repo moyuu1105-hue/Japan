@@ -66,11 +66,14 @@
     }
     .map-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
     
-    /* 地圖容器：CartoDB 淺灰日系風底層 */
+    /* 地圖容器與日系冷色灰白濾鏡（免 API 且極具雜誌質感） */
     #map { 
       width: 100%; height: 360px; border-radius: 12px; 
       border: 1px solid var(--border); z-index: 10; position: relative; 
-      background: #F2F3F0;
+      background: #F4F4F2;
+    }
+    .leaflet-japanese-clean {
+      filter: grayscale(88%) contrast(92%) brightness(104%);
     }
 
     .filter-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
@@ -123,7 +126,7 @@
     }
     .card-actions { display: flex; gap: 8px; margin-top: 6px; }
 
-    /* Modal 彈窗：強化層級至 9999，防地圖覆蓋 */
+    /* Modal 彈窗層級強化 */
     .modal-backdrop {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(44, 43, 41, 0.6);
@@ -144,7 +147,7 @@
     }
     .hidden { display: none !important; }
 
-    /* 表單項目樣式 */
+    /* 表單樣式 */
     .form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-main); }
     .form-control {
@@ -153,7 +156,6 @@
     }
     .form-control:focus { border-color: var(--wood); }
 
-    /* 照片清單預覽 */
     .photos-list {
       display: flex; flex-wrap: wrap; gap: 8px; min-height: 60px;
       background: var(--bg-warm); padding: 8px; border-radius: 10px;
@@ -170,7 +172,6 @@
       border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px;
     }
 
-    /* 日系極簡高冷圖釘樣式 */
     .custom-pin {
       width: 32px; height: 32px; background: var(--wood); color: #FFF;
       border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
@@ -215,7 +216,7 @@
       <div class="map-header">
         <div>
           <h2 style="font-size:14px;font-weight:700;">機位分佈地圖</h2>
-          <span style="font-size:11px;color:var(--text-muted);">CartoDB Positron 極簡日系風格底圖</span>
+          <span style="font-size:11px;color:var(--text-muted);">極簡日系冷淡風 · 標註行政區與機位</span>
         </div>
         <div style="display:flex;gap:6px;">
           <button onclick="focusAllSpots()" class="btn">全覽</button>
@@ -312,7 +313,6 @@
         <textarea id="editNotes" rows="2" placeholder="注意事項..." class="form-control"></textarea>
       </div>
 
-      <!-- 多圖相簿管理 -->
       <div class="form-group">
         <label>示範照片（支援多張上傳，自動壓縮）</label>
         <div id="photosList" class="photos-list"></div>
@@ -380,7 +380,6 @@
   </div>
 
   <script>
-    // 內建完整資料庫（包含 ogino十字路口 等，已排除澀谷天空）
     const DEFAULT_SPOTS = [
       {
         "id": "custom-1793374095735",
@@ -547,14 +546,15 @@
       document.getElementById('spotCountText').textContent = `共標記 ${spots.length} 處攝影點`;
     }
 
-    // 核心升級：載入 CartoDB Positron（極簡日系・高冷白底風）
+    // 免 API Key 的日系極簡・高冷白底圖資設定
     function initMap() {
       map = L.map('map', { zoomControl: true }).setView([35.5017, 138.7575], 11);
       
-     L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
-  maxZoom: 20,
-  attribution: '&copy; OpenStreetMap &copy; Stadia Maps'
-}).addTo(map);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap',
+        className: 'leaflet-japanese-clean'
+      }).addTo(map);
 
       markersLayer = L.layerGroup().addTo(map);
       renderMarkers();
