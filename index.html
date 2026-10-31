@@ -252,7 +252,7 @@
     <div id="spotsGrid" class="grid-cards"></div>
   </main>
 
-  <!-- 管理員認證彈窗（已移除預設密碼文字） -->
+  <!-- 管理員認證彈窗 -->
   <div id="authModal" class="modal-backdrop hidden">
     <div class="modal-box" style="max-width:340px;text-align:center;">
       <div class="modal-head">
@@ -748,6 +748,7 @@
       if (!isAdmin) return alert('需要管理員權限');
       document.getElementById('editModal').classList.remove('hidden');
       const deleteBtn = document.getElementById('deleteSpotBtn');
+      document.getElementById('uploadLabelText').textContent = '選擇手機/電腦相片';
 
       if (spotId) {
         const spot = spots.find(s => s.id === spotId);
@@ -797,6 +798,7 @@
       }
     }
 
+    /* 修正：儲存成功明確跳出確認提示 */
     function saveSpotData() {
       const id = document.getElementById('editSpotId').value;
       const name = document.getElementById('editName').value.trim();
@@ -832,6 +834,7 @@
       renderMarkers();
       renderSpots();
       closeEditModal();
+      alert(`機位「${name}」已成功儲存！`);
     }
 
     function renderModalPhotos() {
@@ -857,38 +860,68 @@
       renderModalPhotos();
     }
 
+    /* 修正：優化圖片壓縮流程，防止卡在「壓縮中」，並給予成功狀態提示 */
     function handleImageUpload(e) {
       const files = e.target.files;
-      if (!files || files.length === 0) return;
-      document.getElementById('uploadLabelText').textContent = '壓縮中...';
+      const label = document.getElementById('uploadLabelText');
+      if (!files || files.length === 0) {
+        label.textContent = '選擇手機/電腦相片';
+        return;
+      }
 
-      let done = 0;
+      label.textContent = '正在壓縮照片...';
+
+      let processed = 0;
+      const total = files.length;
+
+      const checkFinished = () => {
+        processed++;
+        if (processed >= total) {
+          renderModalPhotos();
+          label.textContent = '✓ 上傳成功（可繼續選擇）';
+          setTimeout(() => {
+            if (label.textContent === '✓ 上傳成功（可繼續選擇）') {
+              label.textContent = '選擇手機/電腦相片';
+            }
+          }, 2500);
+          e.target.value = '';
+        }
+      };
+
       Array.from(files).forEach(file => {
+        if (!file.type.startsWith('image/')) {
+          checkFinished();
+          return;
+        }
+
         const reader = new FileReader();
+        reader.onerror = () => checkFinished();
         reader.onload = ev => {
           const img = new Image();
+          img.onerror = () => checkFinished();
           img.onload = () => {
-            const max = 600;
-            let w = img.width, h = img.height;
-            if (w > max || h > max) {
-              if (w > h) { h = Math.round((h * max) / w); w = max; }
-              else { w = Math.round((w * max) / h); h = max; }
+            try {
+              const max = 700;
+              let w = img.width, h = img.height;
+              if (w > max || h > max) {
+                if (w > h) { h = Math.round((h * max) / w); w = max; }
+                else { w = Math.round((w * max) / h); h = max; }
+              }
+              const canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+              currentModalPhotos.push(dataUrl);
+            } catch (err) {
+              console.error(err);
             }
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            currentModalPhotos.push(canvas.toDataURL('image/jpeg', 0.55));
-            done++;
-            if (done === files.length) {
-              document.getElementById('uploadLabelText').textContent = '選擇手機/電腦相片';
-              renderModalPhotos();
-            }
+            checkFinished();
           };
           img.src = ev.target.result;
         };
         reader.readAsDataURL(file);
       });
-      e.target.value = '';
     }
 
     function openSyncModal() {
