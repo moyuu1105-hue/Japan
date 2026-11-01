@@ -803,8 +803,9 @@
 
       geoTimeout = setTimeout(async () => {
         try {
-          // 呼叫 Nominatim 地理編碼 API (針對日本地點)
-          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=jp&limit=5&addressdetails=1`);
+          // 雙語強化：加入 accept-language 與 viewbox 優先權重，中日文地標皆可順暢搜尋
+          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6&addressdetails=1&accept-language=zh-TW,ja,en&viewbox=138.0,36.5,140.5,35.0`;
+          const res = await fetch(url);
           const data = await res.json();
           list.innerHTML = '';
 
