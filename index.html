@@ -786,7 +786,7 @@
     }
 
     /* 需求 1：地址即時建議搜尋與換算經緯度 */
-    function handleAddressInput(e) {
+   function handleAddressInput(e) {
       const q = e.target.value.trim();
       const list = document.getElementById('addressSuggestions');
       const status = document.getElementById('geoStatusText');
@@ -803,10 +803,31 @@
 
       geoTimeout = setTimeout(async () => {
         try {
-          // 雙語強化：加入 accept-language 與 viewbox 優先權重，中日文地標皆可順暢搜尋
-          const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6&addressdetails=1&accept-language=zh-TW,ja,en&viewbox=138.0,36.5,140.5,35.0`;
-          const res = await fetch(url);
-          const data = await res.json();
+          // 自動將繁體字轉換為日文漢字，避免 OSM 無法比對
+          let query = q
+            .replace(/區/g, '区')
+            .replace(/號/g, '号')
+            .replace(/縣/g, '県')
+            .replace(/澀/g, '渋')
+            .replace(/濱/g, '浜')
+            .replace(/鐵/g, '鉄');
+
+          const fetchGeo = async (searchTerm) => {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTerm)}&limit=6&addressdetails=1&accept-language=zh-TW,ja,en&viewbox=138.0,36.5,140.5,35.0`;
+            const res = await fetch(url);
+            return await res.json();
+          };
+
+          let data = await fetchGeo(query);
+
+          // 若太詳細查不到（如帶有丁目番號），自動去除尾段門牌再次嘗試搜尋
+          if ((!data || data.length === 0) && /[0-9一二三四五六七八九十]+.*$/.test(query)) {
+            const fallback = query.replace(/[0-9一二三四五六七八九十]+(丁目|番|号|-).*$/, '').trim();
+            if (fallback && fallback !== query) {
+              data = await fetchGeo(fallback);
+            }
+          }
+
           list.innerHTML = '';
 
           if (data && data.length > 0) {
@@ -829,7 +850,7 @@
         }
       }, 400);
     }
-
+    
     function selectSuggestedAddress(item) {
       document.getElementById('editAddress').value = item.display_name;
       document.getElementById('editLat').value = parseFloat(item.lat).toFixed(6);
